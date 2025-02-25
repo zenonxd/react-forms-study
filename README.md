@@ -177,3 +177,76 @@ const App = () => {
     )
 }
 ```
+
+# Select
+
+O ``value`` e ``onChange`` são definidos no select. Para definir um valor inicial, coloque o mesmo no useState.
+
+```jsx
+import {useState} from "react";
+
+const App = () => {
+    const [select, setSelect] = useState("");
+    //const [select, setSelect] = useState("smartphone");//caso queira deixar algo aparecendo logo de cara
+    return (
+        <form>
+            <select value={select} onChange={({target}) => setSelect(target.value)}>
+                <option disabled value=""></option> //forca o User a selecionar algo, irá aparecer um campo vazio
+                <option value="notebook">Notebook</option>
+                <option value="smartphone">Smartphone</option>
+                <option value="tablet">Tablet</option>
+            </select>
+            <p>{select}</p>
+        </form>
+    );
+};
+```
+
+Caso a gente queira "forçar" o usuário a selecionar algo, adicionar uma option vazia com disabled, ficará assim:
+
+![img.png](img.png)
+
+Ou, podemos passar um valor no useState para já ficar algo selecionado.
+
+# Radio
+
+No ``radio``, comparamos o valor selecionado com o valor do input, dentro do atributo checked. O que retornar true, irá
+marcar o botão.
+
+Ou seja, o que está dentro de ``value`` não importa muito, pois é estático! O que conta (é reativo) é o que checamos dentro do ``checked``.
+
+```jsx
+import {useState} from "react";
+
+const App = () => {
+    const [radio, setRadio] = useState('');
+    
+    function handleChange({target}) {
+        setRadio(target.value);
+    }
+    
+    return (
+        <form>
+            <label>
+                <input
+                    type="radio"
+                    value="notebook"
+                    checked={radio === 'notebook'} //retorna true ou false
+                    onChange={handleChange}
+                />
+                Notebook
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    value="smartphone"
+                    checked={radio === 'smartphone'} //retorna true ou false
+                    onChange={handleChange}
+                />
+                Smartphone
+            </label>
+        </form>
+    )
+}
+```
