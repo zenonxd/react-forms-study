@@ -19,7 +19,7 @@ const useForm = (type) => {
     function validate(value) {
 
         //para caso a gente queira um campo que não
-        //é necessario preencher, ele não cairá no if abaixo
+        //é necessario preencher, ele não cairá no if abaixo ⬇️
         if (type === false) return true;
 
         if (value.length === 0) {
@@ -40,6 +40,8 @@ const useForm = (type) => {
     }
 
     function onChange({target}) {
+        //se existir algum erro, realização a validação, se cair no true
+        //continua pro setValue abaixo
         if (error) validate(target.value);
 
         setValue(target.value);

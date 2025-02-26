@@ -769,6 +769,161 @@ onBlur, onChange e demais objetos que são retornados dele!
 
 ![img_12.png](img_12.png)
 
-
 ## Compreendendo tudo que foi feito
 
+### Passo 1 - Custom Hook
+
+Criamos o custom hook. De cara, criamos com useState o valor (o que está sendo digitado) e o erro! Além disso, passamos
+como propriedade o type (se será cep, name, password e afins).
+
+```jsx
+const useForm = (type) => {
+    const [value, setValue] = useState('');
+    const [error, setError] = useState(null);
+}
+```
+
+<hr>
+
+Agora, podemos ir para a função de validação. Iremos passar o value (o que fora digitado dentro do componente).
+
+Depois, podemos criar a função para cada o input é modificado.
+
+E por fim, retornamos os objetos que iremos utilizar a frente.
+
+```jsx
+const useForm = (type) => {
+    const [value, setValue] = useState('');
+    const [error, setError] = useState(null);
+
+    function validate(value) {
+
+        //para caso a gente queira um campo que não
+        //é necessario preencher, ele não cairá no if abaixo ⬇️
+        if (type === false) return true;
+
+        if (value.length === 0) {
+            setError('Preencha um valor');
+            return false;
+
+            //esse primeiro else-if verifica se existe o type
+            //pois pode ser um campo que n iremos verificar
+        } else if (types[type] && !types[type].regex.test(value)) {
+            //acessando a mensagem de erro do objeto que fora passado
+            //como parâmetro
+            setError(types[type].message);
+            return false;
+        } else {
+            setError(null);
+            return true;
+        }
+    }
+
+    function onChange({target}) {
+        //se existir algum erro, realização a validação, se cair no true
+        //continua pro setValue abaixo
+        if (error) validate(target.value);
+
+        setValue(target.value);
+    }
+
+    return {
+        value,
+        setValue,
+        error,
+        onChange,
+        //assim que saímos do campo, ele irá usar a função da validação
+        onBlur: () => validate(value),
+        validate: () => validate(value),
+    };
+}
+
+export default useForm;
+```
+
+### Passo 2 - Alteração Component Input
+
+Não iremos mais passar somente algumas propriedades e depois o ``...props``, no fim. Iremos desestruturar tudo que iremos
+utilizar, os ``...props`` serão os objetos retornados do custom hook.
+
+```jsx
+const Input = ({
+                   id,
+                   label,
+                   type,
+                   placeholder,
+                    //tudo isso vem do custom hook ⬇️
+                   onChange,
+                   value,
+                   onBlur,
+                   error }) => {
+    return (
+        <>
+            <label htmlFor={id}>{label}</label>
+            <input
+                id={id}
+                name={id}
+                placeholder={placeholder}
+                type={type}
+                
+                //props do custom hook
+                onChange={onChange}
+                onBlur={onBlur}
+                value={value}
+            />
+            {error && <p>{error}</p>}
+        </>
+    );
+};
+
+export default Input;
+
+```
+
+### Passo 3 - Utilizando tudo no App.jsx
+
+Para cado campo, criamos um custom hook diferente.
+
+Ainda utilizamos a função de handleSubmit. Note que dentro dela, acessamos a função de validate retornada no custom hook.
+
+![img_15.png](img_15.png)
+
+```jsx
+function App() {
+
+    const cep = useForm('cep');
+    const email = useForm('email');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (cep.validate()) {
+            console.log('CEP válido');
+        } else {
+            console.log('CEP inválido');
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Input
+                label="CEP"
+                id="CEP"
+                type="text"
+                placeholder="00000-000"
+                {...cep}
+            />
+
+            <Input
+                label="Email"
+                id="email"
+                type="email"
+                placeholder="seu-email@example.com"
+                {...email}
+            />
+            <button>Enviar</button>
+        </form>
+    );
+}
+
+export default App
+```

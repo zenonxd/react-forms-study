@@ -30,7 +30,7 @@ function App() {
             />
 
             <Input
-            label="Email"
+                label="Email"
                 id="email"
                 type="email"
                 placeholder="seu-email@example.com"

@@ -2,11 +2,12 @@
 const Input = ({
                    id,
                    label,
+                   type,
+                   placeholder,
+                    //tudo isso vem do custom hook ⬇️
                    onChange,
                    value,
-                   type,
                    onBlur,
-                   placeholder,
                    error }) => {
     return (
         <>
@@ -14,10 +15,12 @@ const Input = ({
             <input
                 id={id}
                 name={id}
-                onChange={onChange}
                 placeholder={placeholder}
-                onBlur={onBlur}
                 type={type}
+
+                //props do custom hook
+                onChange={onChange}
+                onBlur={onBlur}
                 value={value}
             />
             {error && <p>{error}</p>}
