@@ -593,3 +593,182 @@ const App = () => {
     )
 }
 ```
+
+# Validação
+
+Vamos primeiro falando do ``onBlur``.
+
+O ``onBlur`` é ativado sempre que o campo fica fora de foco (saímos do elemento), momento perfeito para validarmos o dado do campo.
+
+A validação pode ser com JavaScript utilizando REGEX.
+
+REGEX seria o que está dentro do else-if. Verificamos se possui cinco dígitos, se tem hífen e se termina com 3 dígitos.
+
+Outra coisa interessante, é que mudamos a estruturação do componente Input. Anteriormente, no onChange, utilizávamos a
+função de set do useState, e dentro do componente, fazíamos a verificação com a função de callback, assim:
+
+**No componente input:**
+
+![img_4.png](img_4.png)
+
+<hr>
+
+**No App.jsx:**
+
+![img_3.png](img_3.png)
+
+
+<hr>
+
+Agora, ao ocorrer uma mudança, simplesmente usamos a função de handleChange! E dentro do componente, não usamos mais
+a função de set do useState, e sim o ``onChange``. Isso evita que ao usuário sair do campo de CEP, ele já emita uma 
+mensagem de erro. Ficará assim:
+
+**No componente Input:**
+
+Passamos o onChange como parâmetro.
+
+![img_6.png](img_6.png)
+
+<hr>
+
+No App.jsx:
+
+Usamos a função de handleChange
+
+![img_5.png](img_5.png)
+
+<hr>
+
+Outra coisa interessante é validar também ao enviar o formulário. Devemos impedir o envio do formulário caso exista erro no preenchimento.
+
+Agora ele valida em três momentos: ao sair do componente (onBlur), valida caso tenha algum erro (em toda mudança que tiver) e 
+valida também ao enviar o formulário.
+
+
+```jsx
+const App = () => {
+    const [cep, setCep] = useState('');
+    const [error, setError] = useState(null);
+    
+    function handleSubmit(event) {
+        event.preventDefault();
+        //se o cep for valido, irá enviar
+        if (validateCep(cep)) {
+            console.log('Enviar');
+        } else {
+            console.log('Não enviar');
+        }
+    }
+    
+    function validateCep(value) {
+        if (value.length === 0) {
+            setError('Preencha um valor');
+            return false;
+        } else if (!/^\d{5}-?\d{3}$/.test(value)) {
+            setError('Preencha um cep válido');
+            return false;
+        } else {
+            setError(null);
+            return true;
+        }
+    }
+    
+    function handleBlur({target}) {
+        validateCep(target.value);
+    }
+    
+    function handleChange({target}) {
+        //sem isso, assim que o user começar a digitar
+        //vai aparecer mensagem de erro
+        if (error) validateCep(target.value); 
+        setCep(target.value)
+    }
+    
+    return (
+        <form onSubmit={handleSubmit}>
+            <Input 
+                label="CEP"
+                id="CEP"
+                type="text"
+                value={cep}
+                onChange={handleChange}
+                onBlur={handleBlur}
+            />
+            {error && <p>{error}</p>}
+            <button>Enviar</button>
+        </form>
+    );
+};
+```
+
+# Custom Hook useForm
+
+Tudo isso que aprendemos acima foi bem interessante. Mas podemos também criar um custom hook para formulários, onde
+será possivel fazer várias validações.
+
+Poderemos passar uma lista de validações, onde teremos sempre o REGEX que iremos valiar e a mensagem a ser exibida.
+
+Vamos começar pelo hook.
+
+## useForm
+
+A primeira coisa que queremos é settar seu estado (estado do formulário), então é a primeira coisa que iremos criar.
+
+![img_7.png](img_7.png)
+
+Agora vem a parte de criar a função de validação. Anteriormente, a gente checava o regex só do CEP! Como agora terão
+outros campos, faremos algumas alterações.
+
+Quando o usuário for utilizar esse hook, ele irá precisar passar um argumento, um type (se é name, password, email...).
+
+Criaremos esse type fora do escopo. Será uma lista de objetos com vários tipos diferentes.
+
+![img_8.png](img_8.png)
+
+<hr>
+
+Agora, dentro da função, poderemos usar esse objeto para realizar a verificação.
+
+![img_14.png](img_14.png)
+
+<hr>
+
+Como todo hook, iremos definir o nosso retorno (objeto com as variáveis):
+
+![img_13.png](img_13.png)
+
+<hr>
+
+Faremos algumas alterações agora no App.jsx e no componente de Input.
+
+Usaremos o hook dessa maneira, sem a necessidade de passar uma função de set, uma vez que ela já irá existir dentro do
+hook. A ideia é somente passar a string do type a ser utilizado.
+
+![img_9.png](img_9.png)
+
+Ao chamar o componente de Input, poderíamos até passar o cep como um props ``...cep``, mas isso iria expor todos os
+objetos que retornamos no custom hook:
+
+![img_10.png](img_10.png)
+
+<hr>
+
+Então, qual seria a ideia? Iremos alterar o componente de Input, ele não terá mais um ``...props`` desestruturado, ao
+invés disso, iremos desestruturar cada propriedade que iremos utilizar, veja:
+
+Tudo desestruturado e sendo utilizado dentro do componente, juntamente com o erro para caso exista, seja exibido em um
+parágrafo.
+
+![img_11.png](img_11.png)
+
+<hr>
+
+Agora no ``App.jsx``, passamos as propriedades com o ``...cep``. Sim, utilizamos ele dessa forma, para que ele traga:
+onBlur, onChange e demais objetos que são retornados dele!
+
+![img_12.png](img_12.png)
+
+
+## Compreendendo tudo que foi feito
+
